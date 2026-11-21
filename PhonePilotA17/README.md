@@ -1,7 +1,7 @@
 # PhonePilot A17 — mobile-only prototype
 
 **기기:** Galaxy A17 (SM-A175N), Android 9+ (target API 35)
-**상태:** 소스 구현 완료 / Android SDK 빌드 및 실기기 테스트 미완료. APK로 검증되지 않았습니다.
+**상태:** GitHub Actions 최초 APK 컴파일 확인, 기기 설치 및 실기기 테스트 미완료. Google Play Protect가 이전 APK 설치를 차단한 사례가 있습니다. 아이콘 보완 버전이며 Play Protect 차단 해소는 보증하지 않습니다.
 
 ## 목표
 
@@ -12,7 +12,7 @@ ChatGPT 대화 → Google Calendar에 명령 이벤트 등록 → 동일 Google 
 ## 설치 (컴퓨터 없이)
 
 1. GitHub Actions의 `Build PhonePilot A17 APK` 워크플로를 실행해 `PhonePilotA17-debug-apk` 아티팩트를 받습니다. 소스 리포지토리를 배포한 경우 모바일 브라우저에서 가능합니다.
-2. ZIP 아티팩트의 `app-debug.apk`를 갤럭시 A17에 설치합니다. 설치 경로에 따라 Android가 외부 앱 설치나 접근성 권한을 제한할 수 있습니다. 제한을 우회하도록 설계하지 않았습니다.
+2. ZIP 아티팩트의 `app-debug.apk`를 확인합니다. Google Play Protect에서 차단되면 설치를 중단하고 경고 사유를 확인하세요. 보안 기능을 끄거나 우회하는 사용법은 제공하지 않습니다. 이 앱은 Google Play 배포 검증을 통과한 앱이 아닙니다.
 3. 앱을 열어 캘린더 읽기, 알림, 접근성 권한을 사용자 본인이 검토한 뒤 허용합니다.
 4. `③ ChatGPT 명령 수신 시작`을 누릅니다. 명령을 감시할 때 앱의 상시 알림이 표시됩니다.
 5. ChatGPT에서 Google Calendar 이벤트를 생성하면, 동기화 후 PhonePilot 앱에 사용자 승인 알림이 나타납니다.
@@ -53,7 +53,8 @@ GitHub Actions 워크플로는 Android SDK와 Gradle 8.10.2를 설치한 Linux �
 
 ## 테스트 체크리스트
 
-- [ ] GitHub Actions 컴파일 성공
+- [x] 최초 버전 GitHub Actions 컴파일 성공
+- [ ] 수정 버전 컴파일과 아이콘 리소스 검증
 - [ ] A17에 APK 설치 성공
 - [ ] 접근성 서비스 권한 활성화
 - [ ] Google Calendar 동기화된 이벤트 수신
@@ -62,3 +63,10 @@ GitHub Actions 워크플로는 Android SDK와 Gradle 8.10.2를 설치한 Linux �
 - [ ] Samsung Notes 신규 노트 입력 및 재열람으로 저장 여부 검증
 
 실기기 검증 전에는 “작동 검증 완료”라고 주장하지 않습니다.
+
+## Google Play Protect 차단 및 아이콘
+
+- 초기 앱 매니페스트에 아이콘 선언이 누락되어 있었습니다. v0.1.1에서 적응형 런처 아이콘을 추가했습니다.
+- 설치가 차단되면 홈 화면에 아이콘이 생기지 않는 것이 정상입니다. 아이콘 보완만으로 Play Protect 차단이 풀리지는 않습니다.
+- 접근성 서비스는 민감한 권한입니다. 보안 기능을 끄거나 제한을 우회하여 설치하지 마세요.
+- 공식 Play Protect 재검토 및 검증된 배포가 필요할 수 있습니다.

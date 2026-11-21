@@ -12,7 +12,7 @@
         <package android:name="com.nhn.android.search" />
         <intent><action android:name="android.intent.action.VIEW"/><data android:scheme="https" /></intent>
     </queries>
-    <application android:allowBackup="false" android:label="PhonePilot A17" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:usesCleartextTraffic="false">
+    <application android:allowBackup="false" android:label="PhonePilot A17" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:usesCleartextTraffic="false">
         <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop">
             <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
         </activity>
