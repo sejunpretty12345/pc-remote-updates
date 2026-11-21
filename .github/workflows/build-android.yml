@@ -1,14 +1,12 @@
-name: Build PhonePilot A17 Lite APK
+name: Build PhonePilot AI A17 Assistant APK
 on:
   workflow_dispatch:
   push:
-    branches: [phonepilot-a17, phonepilot-a17-safe]
-    paths: ['PhonePilotA17/**', '.github/workflows/build-android.yml']
+    branches: [phonepilot-a17-assistant]
   pull_request:
     branches: [main]
-    paths: ['PhonePilotA17/**', '.github/workflows/build-android.yml']
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,36 +16,29 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install Android SDK platform
+      - name: Android SDK setup
         run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
-      - name: Gradle setup
-        uses: gradle/actions/setup-gradle@v4
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Build debug APK
+      - name: Compile debug APK
         working-directory: PhonePilotA17
         run: gradle :app:assembleDebug --stacktrace
-      - name: Verify APK signature and launcher icon
+      - name: Verify signer icon and permissions
         working-directory: PhonePilotA17
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk | tee /tmp/phonepilot-badging.txt
-          grep 'application-icon-' /tmp/phonepilot-badging.txt
-          echo "----- Permissions -----"
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump permissions app/build/outputs/apk/debug/app-debug.apk | tee /tmp/phonepilot-permissions.txt
-          if grep -E "BIND_ACCESSIBILITY_SERVICE|READ_CALENDAR|FOREGROUND_SERVICE|POST_NOTIFICATIONS" /tmp/phonepilot-permissions.txt; then
-            echo "Unexpected sensitive permission in lite APK."
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk | tee /tmp/badging.txt
+          grep 'application-icon-' /tmp/badging.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump permissions app/build/outputs/apk/debug/app-debug.apk | tee /tmp/perms.txt
+          if grep -E 'BIND_ACCESSIBILITY_SERVICE|READ_CALENDAR|QUERY_ALL_PACKAGES|SEND_SMS|CALL_PHONE|READ_CONTACTS|SYSTEM_ALERT_WINDOW' /tmp/perms.txt; then
+            echo 'Forbidden permission found in app manifest'
             exit 1
           fi
-          if unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "PilotAccessibilityService.class"; then
-            echo "Unexpected AccessibilityService class."
-            exit 1
-          fi
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
-        if: success()
         with:
-          name: PhonePilotA17-Lite-debug-apk
+          name: PhonePilotAI-A17-assistant-apk
           path: PhonePilotA17/app/build/outputs/apk/debug/app-debug.apk

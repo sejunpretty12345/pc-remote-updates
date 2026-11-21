@@ -1,38 +1,50 @@
-# PhonePilot A17 Lite v0.2.0
+# PhonePilot AI A17 — v0.3.0 assistant
 
-This is a **permission-minimized, local-only prototype** for Samsung Galaxy A17. It is NOT a phone remote-control system and is NOT connected to this ChatGPT chat.
+Android app for Galaxy A17. **No Accessibility Service, root, ADB, device-administrator privilege, or QUERY_ALL_PACKAGES.**
 
-## Why this fork exists
+## What actually works (Android-supported mechanisms)
 
-Google Play Protect blocked the prior APK and warned that it could request access to sensitive information. The previous app declared an AccessibilityService, a foreground service and calendar-reading permissions. Rather than bypass Play Protect, this branch removes those capabilities entirely.
+- In-app Korean conversational command input with explicit execution confirmation
+- Optional speech transcription through the device's speech recognizer, with a reviewable text field before sending
+- Launch installed apps by visible launcher label (Android package-visibility `MAIN`/`LAUNCHER` query), including known app aliases
+- YouTube search, Google/Naver browser search, map searches via intents
+- Alarm/timer setup via system Clock intents (normal `SET_ALARM` permission), user confirms in Clock app
+- Calendar event creation UI via `ACTION_INSERT`, user saves
+- Wi-Fi/Bluetooth/display/battery settings panels (do not silently toggle)
+- Media volume adjustment, camera launch, dialer (no call placed), SMS compose (no message sent)
+- Local PhonePilot notes with direct save and retrieval; share-sheet to Samsung Notes (final saving done manually)
+- Confirmation dialog for all executable commands, local history, emergency stop, 200-app picker
+- Optional Gemini 3.5 Flash-Lite natural-language interpretation using user's *own* API key stored via Android Keystore AES-GCM; only unsupported command text sent to Google
 
-The launcher icon remains configured and the build checks for an APK signature and icon resources.
+## What Android will not let this app do without different privileged integration
 
-## Features
+- **Automatically edit existing Samsung Notes or touch arbitrary controls in other apps.** Sharing text is not direct editing.
+- Read private contents of other apps; impersonate user; authorize purchases; send messages without confirmation.
+- Directly connect this particular ChatGPT conversation to the phone. This build is **an in-app assistant** rather than a ChatGPT connector.
+- Run a background virtual operator. The user initiates tasks in the foreground app.
 
-- Open YouTube searches using an Android VIEW intent
-- Open Naver searches in the browser
-- Launch allowlisted apps (YouTube, Samsung Notes, Chrome, Naver, Samsung Calendar) if available
-- Share note text using Android's share sheet; **the user must choose an app and save the note**
-- Optional home screen intent
-- Explicit local approval dialog before actions
-- Local history and emergency stop toggle
+### Security
 
-## Not supported
+- Normal permissions only: `INTERNET` (optional API) and `SET_ALARM` (Android Clock intent).
+- No accessibility request, screen capture, notifications, calendar read/write, SMS sending, camera read, location read, contacts or phone-call permissions.
+- Does not send installed-app lists or local notes to the Gemini API; sending any typed prompt requires user to submit it in chat.
+- API key stored encrypted using device Android Keystore; not hardcoded into the APK.
+- The remote model proposes one strictly validated command; confirmation is required before executing it.
+- **Do not turn off Play Protect or bypass device restrictions if the APK installation is blocked.** Unreviewed sideloaded debug APKs may still be blocked, even without AccessibilityService.
 
-- ChatGPT chat-to-phone direct remote control
-- Automatically writing or editing Samsung Notes
-- Accessibility screen reading / touches / scrolling
-- Google Calendar event command polling
-- Verification on a physical Galaxy A17
-- Google Play Protect approval: build success does not establish an app is safe or approved
+### Build
 
-No runtime permissions are requested in the AndroidManifest. In particular, no accessibility service is declared and no calendar, notification or foreground-service permission is requested.
+GitHub Actions on `phonepilot-a17-assistant` uses Android Gradle Plugin 8.8.2, Gradle 8.10.2, Java 17 and Android SDK 35. Verifies debug APK signing, launcher icon and manifest forbidden permissions. Debug-signed APKs are not approved Play Store releases.
 
-## Build / install
+### Test plan
 
-The GitHub Actions workflow on branch `phonepilot-a17-safe` compiles a debug APK and verifies its signature/icon. Debug signing is for local development, not production distribution.
+- [ ] Installed on physical SM-A175N (not possible remotely)
+- [ ] Voice recognition and edit
+- [ ] App label match (KakaoTalk/YouTube/Samsung Notes)
+- [ ] Clock alarm and timer
+- [ ] Calendar insert confirmation
+- [ ] Samsung Notes sharing as separate user save action
+- [ ] Gemini API key privacy, API response parsing, error handling
+- [ ] Play Protect developer review / trusted distribution
 
-**If Play Protect blocks the APK, stop installation. Do not disable Play Protect or circumvent the warning.** Use a trusted channel and official review/distribution as appropriate.
-
-A successful compile alone does not demonstrate device support or real-world functionality.
+A successful GitHub Actions build verifies compile, not on-device functionality or Play Protect approval.
