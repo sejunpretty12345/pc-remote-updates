@@ -4,6 +4,9 @@ on:
   push:
     branches: [phonepilot-a17]
     paths: ['PhonePilotA17/**', '.github/workflows/build-android.yml']
+  pull_request:
+    branches: [main]
+    paths: ['PhonePilotA17/**', '.github/workflows/build-android.yml']
 jobs:
   build:
     runs-on: ubuntu-latest
